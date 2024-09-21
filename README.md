@@ -14,6 +14,7 @@ After a month's relentless efforts, today we are thrilled to release **EraX-VL-7
 
 `EraX-VL-7B-V1` is the latest version of the vision language models in the EraX model families. 
 
+
 ## Quickstart
 Below, we provide simple examples to show how to use `EraX-VL-7B-V1` 🤗 Transformers.
 
