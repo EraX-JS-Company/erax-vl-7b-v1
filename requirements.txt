@@ -1,0 +1,7 @@
+json_repair 
+numpy 
+matplotlib
+tqdm
+pillow
+pymupdf
+opencv-python
