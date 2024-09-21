@@ -130,7 +130,7 @@ print(output_text[0])
 
 ## Citation
 If you find our project useful, we would appreciate it if you could star our repository and cite our work as follows:
-```
+```BibTeX
 @article{EraX-VL-7B-V1,
   title={EraX-VL-7B-V1: A Highly Efficient Multimodal LLM for Vietnamese, especially for medical forms and bills},
   author={Nguyễn Anh Nguyên and Nguyễn Hồ Nam (BCG) and Hoàng Tiến Dũng and Phạm Đình Thục and Phạm Huỳnh Nhật},
@@ -139,3 +139,6 @@ If you find our project useful, we would appreciate it if you could star our rep
   url={https://huggingface.co/erax-ai/EraX-VL-7B-V1}
 }
 ```
+## Acknowledgement
+
+`EraX-VL-7B-V1` is built with reference to the code of the following projects: [Qwen2-VL](https://github.com/QwenLM/Qwen2-VL) and Khang Đoàn ([5CD-AI](https://huggingface.co/5CD-AI)). Thanks for their awesome work!
