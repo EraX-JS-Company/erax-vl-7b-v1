@@ -105,11 +105,11 @@ inputs = processor(
 inputs = inputs.to("cuda")
 
 # Generation configs
-generation_config =  model.generation_config
-generation_config.do_sample   = True
-generation_config.temperature = 0.2
-generation_config.top_k       = 1
-generation_config.top_p       = 0.001
+generation_config                    = model.generation_config
+generation_config.do_sample          = True
+generation_config.temperature        = 0.2
+generation_config.top_k              = 1
+generation_config.top_p              = 0.001
 generation_config.max_new_tokens     = 2048
 generation_config.repetition_penalty = 1.1
 
