@@ -142,4 +142,4 @@ If you find our project useful, we would appreciate it if you could star our rep
 ```
 ## Acknowledgement
 
-`EraX-VL-7B-V1` is built with reference to the code of the following projects: [Qwen2-VL](https://github.com/QwenLM/Qwen2-VL) and Khang Đoàn ([5CD-AI](https://huggingface.co/5CD-AI)). Thanks for their awesome work!
+`EraX-VL-7B-V1` is built with reference to the code of the following projects: [Qwen2-VL](https://github.com/QwenLM/Qwen2-VL), [InternVL](https://github.com/OpenGVLab/InternVL) and Khang Đoàn ([5CD-AI](https://huggingface.co/5CD-AI)). Thanks for their awesome work!
