@@ -124,16 +124,12 @@ output_text = processor.batch_decode(
 
 print(output_text[0])
 ```
+
 ## For API inquiry
 
-- Please contact: nguyen@erax.ai
-
+- For correspondence regarding this work or inquiry for API trial, please contact Nguyễn Anh Nguyên at [nguyen@erax.ai](nguyen@erax.ai).
+- 
 ## Citation
-<!-- - title={EraX-VL-7B-V1: A Highly Efficient Multimodal LLM for Vietnamese, especially for medical forms and bills.},
-- author={Nguyễn Anh Nguyên and Nguyễn Hồ Nam (BCG) and Dũng Hoàng and Thục Phạm and Nhật Phạm},
-- helpers={Khang Đoàn and AAA JS Company},
-- contact={nguyen@erax.ai},
-- organization={EraX} -->
 If you find our project useful, we would appreciate it if you could star our repository and cite our work as follows:
 ```
 @article{EraX-VL-7B-V1,
