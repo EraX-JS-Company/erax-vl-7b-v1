@@ -126,9 +126,8 @@ print(output_text[0])
 ```
 
 ## For API inquiry
-
 - For correspondence regarding this work or inquiry for API trial, please contact Nguyễn Anh Nguyên at [nguyen@erax.ai](nguyen@erax.ai).
-- 
+
 ## Citation
 If you find our project useful, we would appreciate it if you could star our repository and cite our work as follows:
 ```
