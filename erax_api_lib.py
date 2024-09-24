@@ -56,7 +56,7 @@ Trả về kết quả theo định dạng json bằng tiếng Việt:
 
 ```json
 {
-    "extraction": <str diễn giải nội dung của giấy tờ này này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
+    "extraction": <str diễn giải chi tiết nội dung của bức ảnh này này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
     "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
     "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
     "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
@@ -99,16 +99,19 @@ Trả về kết quả theo định dạng json bằng tiếng Việt:
 
 pdf_full_prompt = """
 Bạn là một chuyên gia bồi thường bảo hiểm xuất sắc.
-Bạn được cung cấp danh sách các json là kết quả đã được OCR chính xác.
-Các json này là của một hay nhiều phiếu trong bộ hồ sơ yêu cầu bồi thường bảo hiểm hay hoá đơn các loại.
+Bạn được cung cấp danh sách các json là kết quả đã được OCR chính xác từ một (1) hay nhiều ảnh khác nhau.
+Các json này là của một hay nhiều phiếu trong một bộ hồ sơ yêu cầu bồi thường bảo hiểm, bao gồm một hay nhiều hoá đơn các loại.
 
 Bạn có 1 nhiệm vụ: phân tích và tổng hợp các jsons được cung cấp này:
-- Phân tích kỹ lưỡng các json được cung cấp.
-- Tổng hợp tất cả các json trên bằng 1 json duy nhất có tính tổng hợp để công ty tiến hành xem xét thủ tục bồi thường chính xác và công bằng với định dạng json dưới đây.
+- Phân tích kỹ lưỡng tất cả các json OCR được cung cấp, không đưỡ bỏ sót json nào.
+- Tổng hợp tất cả các json trên bằng 1 json khác có tính tổng hợp nhưng đầy đủ chi tiết để công ty tiến hành xem xét thủ tục bồi thường chính xác và công bằng với định dạng json dưới đây.
 - Không được bỏ qua bất kỳ chi tiết nào về các triệu chứng, các loại thuốc được kê mua, tên bệnh, đề xuất, các phí dịch vụ y tế và các chi phí khác.
-- Nếu cùng một giấy tờ (cùng tên, cùng nhà cung cấp, cùng khách hàng, cùng ngày cấp và người được cấp...) nhưng đang nằm ở nhiều json, bạn phải tổng hợp thành "loại giấy tờ" duy nhất
 - Không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
 - Lưu ý phải tóm tắt ngắn gọn sau khi phân tích
+
+# Dữ liệu được cung cấp:
+
+{ocr_results}
 
 Trả về định dạng json đa văn bản như sau. Không diễn giải cách làm, không tóm tắt, chỉ trả lại duy nhất 1 json như sau:
 
@@ -117,7 +120,6 @@ Trả về định dạng json đa văn bản như sau. Không diễn giải cá
     "<str tên loại giấy tờ được cung cấp trong các json trên>":
     {
         "extraction": <str diễn giải nội dung của giấy tờ này này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
-        "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
         "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
         "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
         "reasons": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
@@ -261,7 +263,6 @@ Trả về kết quả theo định dạng json bằng tiếng Việt:
 
 ## Output:
 """
-
 
 # # Thư viện
 # - Bạn có thể dùng thư viện Python này hoặc chuyển sang ngôn ngữ tương ứng dễ dàng
@@ -734,39 +735,6 @@ def API_Chat_OCR_EraX_VL_7B_vLLM(prompt, history=None, erax_url_id=erax_url_id, 
 # - API chỉ chấp nhận 1 PDF tại 1 thời điểm
 # - API này kỳ vọng bạn truyền vào đường dẫn đến file PDF hoặc Base64
 
-pdf_full_prompt = """
-Bạn là một chuyên gia bồi thường bảo hiểm xuất sắc.
-Bạn được cung cấp danh sách các json là kết quả đã được OCR theo đúng thứ tự của các ảnh. 
-Các json này là của một hay nhiều phiếu trong bộ hồ sơ yêu cầu bồi thường bảo hiểm hay hoá đơn các loại.
-
-Bạn có 1 nhiệm vụ: phân tích và tổng hợp các jsons được cung cấp này:
-- Tổng hợp tất cả các json trên bằng 1 json có tính tổng hợp để công ty tiến hành xem xét thủ tục bồi thường chính xác và công bằng với định dạng json dưới đây.
-- Không được bỏ qua bất kỳ chi tiết nào về các triệu chứng, các loại thuốc được kê mua, tên bệnh, đề xuất, các phí dịch vụ y tế và các chi phí khác.
-- Nếu cùng một giấy tờ (cùng tên, cùng nhà cung cấp, cùng khách hàng, cùng ngày cấp và người được cấp...) nhưng đang nằm ở nhiều json, bạn phải tổng hợp thành "loại giấy tờ" duy nhất
-- Không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
-
-Trả về định dạng json đa văn bản như sau. Không diễn giải cách làm, không tóm tắt, chỉ trả lại duy nhất 1 json như sau:
-
-```json
-[
-    {
-        "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
-        "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
-        "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
-        "doctors": { các thông tin của bức ảnh này về các bác sỹ, y sỹ nếu có... Nếu không có thì để None. },
-        "products": { các thông tin của bức ảnh này về dịch vụ, xét nghiệm, chụp chiếu, giá tiền... Nếu không có thì để None },
-        "services": { các thông tin của bức ảnh này về sản phẩm như thuốc, giá tiền... Nếu không có thì để None },
-        "total amount": <tổng cố tiền trong của bức ảnh này. Nếu không có thì để None>,
-        "conclusion": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
-        "others": { các thông tin khác trong bức ảnh này như ghi chú, điều kiện, uỷ quyền, cam kết... Nếu không có thì để None },
-        ... tất cả thông tin khác nếu có...
-    }
-]
-```
-
-# Output:
-"""
-
 def API_PDF_Full_OCR_EraX_VL_7B_vLLM(pdf_paths=None,
                                        is_base64=False,
                                        prompt=ycbt_prompt, 
@@ -783,7 +751,7 @@ def API_PDF_Full_OCR_EraX_VL_7B_vLLM(pdf_paths=None,
         return text
     
     print ("Parsing PDF...")
-    ocr_result, _ = API_PDF_OCR_EraX_VL_7B_vLLM(pdf_paths=pdf_paths, 
+    ocr_result, history = API_PDF_OCR_EraX_VL_7B_vLLM(pdf_paths=pdf_paths, 
                                                 is_base64=is_base64,
                                                 prompt=prompt,
                                                 erax_url_id=erax_url_id, API_key=API_key)
@@ -793,10 +761,12 @@ def API_PDF_Full_OCR_EraX_VL_7B_vLLM(pdf_paths=None,
         final_pdf =  str(getPDF_text(final_pdf["json_content"]).replace("```json", "").replace("```", "").replace("\n\n", "\n").replace("\n\n", "\n"))
     except Exception as E:
         print("ERROR wrong PDF output format!", str(E))
-        return final_pdf
+        return ocr_result, None
         
     print ("Summarize result...")
-    new_prompt =  str(f"{final_pdf}\n\n{pdf_full_prompt}")
+    pdf_full_prompt_to_send =  pdf_full_prompt.replace("ocr_results", final_pdf)
+    
+    new_prompt =  f"{pdf_full_prompt_to_send}"
 
     print (new_prompt)
     
@@ -816,8 +786,7 @@ def API_PDF_Full_OCR_EraX_VL_7B_vLLM(pdf_paths=None,
     except:
         pass
         
-    return final_pdf_text, history         
-
+    return final_pdf_text, history  
 
 # # Captioning multiple images w/ paths OR Base64
 # - Bạn có thể dùng API này để parse multiple images cả text & ảnh trong đó
@@ -837,7 +806,7 @@ def API_Multiple_Images_OCR_EraX_VL_7B_vLLM(image_paths=None,
         print (f"- Parsing image...{idx}")
         add_img_content(img_path, )
         
-        ocr_result, _ = API_Image_OCR_EraX_VL_7B_vLLM(image_paths=[img_path],
+        ocr_result, _ = API_Image_OCR_EraX_VL_7B_vLLM(image_paths=img_path,
                                                       is_base64=is_base64,
                                                       prompt=prompt,
                                                       erax_url_id=erax_url_id, 
@@ -848,7 +817,8 @@ def API_Multiple_Images_OCR_EraX_VL_7B_vLLM(image_paths=None,
                 
     print ("--> Summarize result...")
     
-    new_prompt =  f"{output_text}\n\n{pdf_full_prompt}"
+    pdf_full_prompt_to_send =  pdf_full_prompt.replace("ocr_results", final_pdf)
+    new_prompt =  f"{pdf_full_prompt_to_send}"
 
     print (new_prompt)
     
@@ -868,4 +838,4 @@ def API_Multiple_Images_OCR_EraX_VL_7B_vLLM(image_paths=None,
     except:
         pass
         
-    return final_text, history         
+    return final_text, history
