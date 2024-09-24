@@ -533,7 +533,6 @@ def checkStatusLongRun(ocr_result, erax_url_id=erax_url, API_key=API_key_3P):
         if type(final_result)==dict:
             if "status" in final_result.keys() and (final_result["status"]=="IN_PROGRESS" or final_result["status"]=="IN_QUEUE"):
                 job_id    =  final_result["id"]
-                worker_id =  final_result["workerId"]
                 print(f"Check status & result...{job_id}")
                 runpod_status_url = f"https://api.runpod.ai/v2/{erax_url_id}/status/{job_id}"
                 head = {}
