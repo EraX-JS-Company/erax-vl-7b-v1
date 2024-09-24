@@ -1,4 +1,4 @@
-#pip install json_repair numpy matplotlib tqdm pillow pymupdf opencv-python
+#pip install json_repair numpy matplotlib tqdm pillow pymupdf
 
 import os, base64, cv2, json_repair, requests, pymupdf
 import matplotlib.pyplot as plt
@@ -6,9 +6,12 @@ from tqdm.notebook import tqdm
 from PIL import Image 
 import pymupdf
 
-erax_url = "https://api.runpod.ai/v2/a4li0qhs1a6f7e/runsync"
-API_key_3P =  "API key" # Digins
+erax_url_id = "a4li0qhs1a6f7e"
+erax_url = f"https://api.runpod.ai/v2/{erax_url_id}/runsync"
 
+erax_url_a100_id =  "jaeprlipf9ih6y"
+erax_url_a100 =  f"https://api.runpod.ai/v2/{erax_url_a100_id}/runsync"
+API_key_3P =  "<API key A100>"
 
 # # Common prompts
 
@@ -17,12 +20,14 @@ default_prompt = "Hãy trích xuất toàn bộ chi tiết của các bức ản
 PDF_prompt = """Hãy trích xuất toàn bộ chi tiết của bức ảnh này theo đúng thứ tự của nội dung trong ảnh. Không bình luận gì thêm.
 Lưu ý:
 1. Nếu có chữ trong ảnh thì phải trích xuất ra hết theo thứ tự và định dạng của câu chữ.
-2. Nếu k=có bảng biểu (table) thì phải trả lại định dạng như bảng biểu trong hình và text của nó.
+2. Nếu có bảng biểu (table) thì phải trả lại định dạng như bảng biểu trong hình và text của nó.
 3. Nếu bức ảnh không có bất kỳ ký tự nào, hãy diễn giải bức ảnh đó.
 4. Chỉ trả lại bằng tiếng Việt.
 
 # Output:
 """
+
+# Output:"""
 
 ycbt_prompt = """
 Bạn là một hệ thống AI đẳng cấp thế giới hỗ trợ nhận diện ký tự quang học (Optical Character Recognition - OCR) từ hình ảnh.
@@ -39,17 +44,26 @@ Bạn phải thực hiện 01 (một) nhiệm vụ chính, bao gồm:
 ## Yêu cầu
 - Tuân thủ thứ tự: từ trái sang phải và sau đó từ trên xuống dưới
 - Đặt biệt PHẢI chú ý không bỏ sót thông tin
-- KHÔNG bịa đặt, đưa thêm thông tin
+- KHÔNG bịa đặt, đưa thêm thông tin hay diễn giải ngoài nội dung trong ảnh
 - Trả về kết quả theo định dạng json
 - chú ý các cụm  từ viết tắt: bảo hiểm y tế (BHYT)
+- không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
 
+```json
 {
-    "loại giấy tờ": <str tên loại giấy tờ>,
-    "thông tin đơn vị cung cấp": { ... },
-    "thông tin khách hàng": { ... },
-    "thông tin sản phẩm, dịch vụ": { ... },
-    ... tất cả các thông tin khác
-}
+    "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
+    "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
+    "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
+    "doctors": { các thông tin của bức ảnh này về các bác sỹ, y sỹ nếu có... Nếu không có thì để None. },
+    "products": { các thông tin của bức ảnh này về dịch vụ, xét nghiệm, chụp chiếu, giá tiền, bao gồm kết qủa khám bệnh hay xét nghiệm... Nếu không có thì để None },
+    "services": { các thông tin của bức ảnh này về sản phẩm như thuốc, giá tiền, bao gồm kết qủa khám bệnh hay xét nghiệm... Nếu không có thì để None },
+    "total amount": <tổng cố tiền phải trả nếu có trong của bức ảnh này. Nếu không có thì để None>,
+    "conclusion": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
+    "others": { các thông tin khác trong bức ảnh này như ghi chú, điều kiện, uỷ quyền, cam kết... Nếu không có thì để None },
+    "extraction": <str diễn giải nội dung của bức ảnh này một cách đầy đủ và không được thiếu thông tin gì.>,
+    ... tất cả thông tin khác nếu có...
+},
+```
 
 ## Output:
 """
@@ -58,7 +72,7 @@ Bạn phải thực hiện 01 (một) nhiệm vụ chính, bao gồm:
 # # Thư viện
 # - Bạn có thể dùng thư viện Python này hoặc chuyển sang ngôn ngữ tương ứng dễ dàng
 
-max_allowed_images = 20
+max_allowed_images = 5
 max_width_mm = 448
 
 def openBase64_Image(b64):
@@ -72,7 +86,12 @@ def openBase64_Image(b64):
 # Generate base64 & prompt for image captioning.
 # If there are more thn 1 images then all images will be scaled to max_width_mm
 # -------------------------------------------
-def add_img_content(image_paths=None, prompt=default_prompt, tmp_path="./tmp/", max_images=max_allowed_images):
+def add_img_content(image_paths=None, 
+                    is_base64=False, 
+                    prompt=default_prompt, 
+                    tmp_path="./tmp/", 
+                    max_images=max_allowed_images, 
+                    force_scale=True):
 
     import uuid
     os.makedirs(tmp_path, exist_ok=True)
@@ -87,18 +106,25 @@ def add_img_content(image_paths=None, prompt=default_prompt, tmp_path="./tmp/", 
         else:
             scaled = True
             
+        if scaled or force_scale:
+            scaled = True
+            print (f"Có {len(image_paths)} ảnh.")
             # Multi images --> scale all images to max_width_mm
             img_path_new = []
             for img_path in image_paths[:max_images]:
 
                 # Use PIL instead of OpenCV
-                img = Image.open(img_path)
+                if not is_base64:
+                    img = Image.open(img_path)
+                else:
+                    img =  openBase64_Image(img_path)
+                    
                 w, h = img.size
                 ratio = w/h
                 w =  max_width_mm
                 h = int(w/ratio)
                 img = img.resize((w, h))
-                file_name =  tmp_path + str(uuid.uuid4())+".jpg" # +img_path.split(".")[-1]
+                file_name =  tmp_path + str(uuid.uuid4())+".jpg"
                 if img.mode in ("RGBA", "P"): 
                     img = img.convert("RGB")
                 img.save(file_name)
@@ -173,13 +199,11 @@ def add_pdf_content(pdf_paths=None, force_validated=True):
         pdf_base64 = encoded_pdf.decode('utf-8')
 
         if force_validated:
-            print ("Validating...")
             dump_name = str(uuid.uuid4())
             with open(f"{dump_name}.pdf", "wb") as f:
                 f.write(base64.b64decode(pdf_base64))
             doc = pymupdf.open(f"{dump_name}.pdf")
             os.remove(f"{dump_name}.pdf")
-            print ("Done Ok.")
             
         all_base64_pdf.append(pdf_base64)
 
@@ -302,47 +326,51 @@ def extract_PDF_EraX_vLLM(file, pdf_base64=False,
     return all_content, full_text
 
 
-# # Image captioning w/ list of [images base64]
+# # RunPod long run
+# - Lưu ý cho PDF nhiều trang hay nhiều ảnh, API sẽ trả về IN_PROGRESS
+# - Dùng /status để check progress và lấy về
+def checkStatusLongRun(ocr_result, erax_url_id=erax_url, API_key=API_key_3P):
+    import time
+    
+    final_result =  ocr_result.copy()
+    while True:
+        time.sleep(0.5)
+        if type(final_result)==dict:
+            if "status" in final_result.keys() and (final_result["status"]==["IN_PROGRESS"] or final_result["status"]=="IN_QUEUE"):
+                job_id    =  final_result["id"]
+                worker_id =  final_result["workerId"]
+                print(f"Check status & result...{job_id}")
+                runpod_status_url = f"https://api.runpod.ai/v2/{erax_url_id}/status/{job_id}"
+                head = {}
+                head["authorization"] = API_key
+                final_result = requests.post(runpod_status_url, headers=head, timeout=120).json()
+            else:
+                break
+        else:        
+            break
+            
+    return final_result
+
+
+# # Image captioning w/ list of [images paths or base64]
 # - Bạn có thể dùng API này để captioning ảnh
 # - Lưu ý prompt hợp lý theo đúng kiểu văn bản cần parse
 # - API chỉ chấp nhận tối đa 20 ảnh nhưng bạn nên captioning tối đa 3 ảnh
 # - API này kỳ vọng bạn truyền vào list các base64 thuần của ảnh
 # - Lưu ý prefix: API đã thêm "data:image;base64" trước decoded {base64} của ảnh rồi
+def API_Image_OCR_EraX_VL_7B_vLLM(image_paths=None,
+                                  is_base64=True, 
+                                  prompt=default_prompt, 
+                                  erax_url_id=erax_url_id, 
+                                  API_key=API_key_3P, 
+                                  force_scale=True):
 
-# -------------------------------------------
-# Call API to parse Images. Pass in base64
-# -------------------------------------------
-def API_Image_Base64_OCR_EraX_VL_7B_vLLM(images_base64=None, prompt=default_prompt, erax_url=erax_url, API_key=API_key_3P):
-
-    tag_image = "".join(["<image>"]*len(images_base64))
-    content_img
-    for b64 in images_base64:      
-        content_img.append(
-                   {
-                    "type": "image_url",
-                    "image_url": 
-                        {
-                            "url": f"data:image;base64,{b64}"
-                        }
-                    } 
-            )
-    
-    
-    messages = [
-        {
-            "role": "user",
-            "content": content_img + [
-                {
-                    "type": "text", 
-                    "text": f"{tag_image}\n{prompt}"
-                }]
-        }
-    ]
+    messages = add_img_content(image_paths, is_base64=is_base64, prompt=prompt, force_scale =force_scale)
     
     content = {
         "generation_config": 
         {
-            "temperature": float(0.2),
+            "temperature": float(0.01),
             "top_p": float(0.001),
             "top_k": int(1),
             "repetition_penalty": float(1.1),
@@ -358,64 +386,8 @@ def API_Image_Base64_OCR_EraX_VL_7B_vLLM(images_base64=None, prompt=default_prom
     head = {}
     head["authorization"] = API_key
 
-    print ("Calling EraX API ....")
-    
-    res = requests.post(erax_url, headers=head, json=data_to_send)
-    
-    error = False
-    
-    try:
-        result =  res.json()["output"]
-    except:
-        result =  res.json()
-        error = True
-        
-    content["messages"].append({
-            "role": "assistant",
-            "content": result,
-            "error": error
-        }
-    )
-    
-    return result, content
- 
-
-
-# # Image captioning w/ list of [images paths]
-# - Bạn có thể dùng API này để captioning ảnh
-# - Lưu ý prompt hợp lý theo đúng kiểu văn bản cần parse
-# - API chỉ chấp nhận tối đa 20 ảnh nhưng bạn nên captioning tối đa 3 ảnh vì GPU có hạn
-# - API này kỳ vọng bạn truyền vào đường dẫn đến các file ảnh (jpg, png, gif etc..)
-
-# -------------------------------------------
-# Call API to parse Images. Pass in image paths
-# -------------------------------------------
-def API_Image_Paths_OCR_EraX_VL_7B_vLLM(image_paths=None, prompt=default_prompt, erax_url=erax_url, API_key=API_key_3P):
-
-    messages = add_img_content(image_paths, prompt=prompt)
-    
-    content = {
-        "generation_config": 
-        {
-            "temperature": float(0.2),
-            "top_p": float(0.001),
-            "top_k": int(1),
-            "repetition_penalty": float(1.1),
-            "max_tokens": 32000
-        },
-        "messages": messages
-    }   
-
-    data_to_send ={
-        "input": content
-    }
-
-    head = {}
-    head["authorization"] = API_key
-
-    print ("Calling EraX API ....")
-    
-    res = requests.post(erax_url, headers=head, json=data_to_send)
+    erax_url = f"https://api.runpod.ai/v2/{erax_url_id}/runsync"   
+    res = requests.post(erax_url, headers=head, json=data_to_send, timeout=3600)
     
     error = False
     
@@ -423,8 +395,11 @@ def API_Image_Paths_OCR_EraX_VL_7B_vLLM(image_paths=None, prompt=default_prompt,
         result =  res.json()["output"]
     except:
         result =  res.json()
-        error = True
-        
+        try:
+            result = checkStatusLongRun(result, erax_url_id=erax_url_id)["output"]
+        except:
+            error = True
+                
     content["messages"].append({
             "role": "assistant",
             "content": result,
@@ -435,71 +410,23 @@ def API_Image_Paths_OCR_EraX_VL_7B_vLLM(image_paths=None, prompt=default_prompt,
     return result, content
 
 
-# # PDF captioning w/ PDF paths
+# # PDF captioning w/ PDF paths or base64
 # - Bạn có thể dùng API này để parse PDF cả text & ảnh trong đó
 # - Lưu ý prompt hợp lý theo đúng kiểu văn bản cần parse
 # - API chỉ chấp nhận 1 PDF tại 1 thời điểm
-# - API này kỳ vọng bạn truyền vào đường dẫn đến file PDF
+# - API này kỳ vọng bạn truyền vào đường dẫn đến file PDF or list of PDF's base64
+def API_PDF_OCR_EraX_VL_7B_vLLM(pdf_paths=None, 
+                                is_base64=False,
+                                prompt=PDF_prompt, 
+                                erax_url_id=erax_url_id, 
+                                API_key=API_key_3P):
 
-def API_PDF_Paths_OCR_EraX_VL_7B_vLLM(pdf_paths=None, prompt=PDF_prompt, erax_url=erax_url, API_key=API_key_3P):
-
-    messages = add_pdf_content_json(pdf_paths, prompt=prompt, is_base64=False)
-    
-    content = {
-        "generation_config":
-        {
-            "temperature": float(0.2),
-            "top_p": float(0.001),
-            "top_k": int(1),
-            "repetition_penalty": float(1.1),
-            "max_tokens": 32000
-        },
-        "messages": messages
-    }   
-
-    data_to_send ={
-        "input": content
-    }
-
-    head = {}
-    head["authorization"] = API_key
-
-    print ("Calling EraX API ....")
-    
-    res = requests.post(erax_url, headers=head, json=data_to_send)
-    
-    error = False
-    
-    try:
-        result =  res.json()["output"]
-    except:
-        result =  res.json()
-        error = True
-        
-    content["messages"].append({
-            "role": "assistant",
-            "content": result,
-            "error": error
-        }
-    )
-    
-    return result, content
-
-
-# # PDF captioning w/ PDF base64
-# - Bạn có thể dùng API này để parse PDF cả text & ảnh trong đó
-# - Lưu ý prompt hợp lý theo đúng kiểu văn bản cần parse
-# - API chỉ chấp nhận 1 PDF tại 1 thời điểm
-# - API này kỳ vọng bạn đã tạo decoded-base64 cho file PDF của mình
-
-def API_PDF_Base64_OCR_EraX_VL_7B_vLLM(pdf_base64=None, prompt=PDF_prompt, erax_url=erax_url, API_key=API_key_3P):
-
-    messages = add_pdf_content_json(pdf_base64, prompt=prompt, is_base64=True)
+    messages = add_pdf_content_json(pdf_paths, prompt=prompt, is_base64=is_base64)
     
     content = {
         "generation_config": 
         {
-            "temperature": float(0.2),
+            "temperature": float(0.01),
             "top_p": float(0.001),
             "top_k": int(1),
             "repetition_penalty": float(1.1),
@@ -515,9 +442,8 @@ def API_PDF_Base64_OCR_EraX_VL_7B_vLLM(pdf_base64=None, prompt=PDF_prompt, erax_
     head = {}
     head["authorization"] = API_key
 
-    print ("Calling EraX API ....")
-    
-    res = requests.post(erax_url, headers=head, json=data_to_send)
+    erax_url = f"https://api.runpod.ai/v2/{erax_url_id}/runsync"   
+    res = requests.post(erax_url, headers=head, json=data_to_send, timeout=3600)
     
     error = False
     
@@ -525,8 +451,11 @@ def API_PDF_Base64_OCR_EraX_VL_7B_vLLM(pdf_base64=None, prompt=PDF_prompt, erax_
         result =  res.json()["output"]
     except:
         result =  res.json()
-        error = True
-        
+        try:
+            result = checkStatusLongRun(result, erax_url_id=erax_url_id)["output"]
+        except:
+            error = True
+                        
     content["messages"].append({
             "role": "assistant",
             "content": result,
@@ -535,36 +464,214 @@ def API_PDF_Base64_OCR_EraX_VL_7B_vLLM(pdf_base64=None, prompt=PDF_prompt, erax_
     )
     
     return result, content
-
 
 # # Chat with the previous result from EraX
 # - Bạn có thể hội thoại liên tục với kết quả EraX đã captioning lần trước hoặc đơn giản là chat với QWen2
+def API_Chat_OCR_EraX_VL_7B_vLLM(prompt, history=None, erax_url_id=erax_url_id, API_key=API_key_3P):
 
-def API_Chat_OCR_EraX_VL_7B_vLLM(prompt, history=None, erax_url=erax_url, API_key=API_key_3P):
+    if history is not None:
+        history["messages"].append({
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text":prompt
+                }
+            ]
+        })
+    else:
+        history = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text":prompt
+                    }
+                ]
+            }
+        ]
+        
+    content = {
+        "generation_config": 
+        {
+            "temperature": float(0.2),
+            "top_p": float(0.95),
+            "top_k": int(10),
+            "repetition_penalty": float(1.1),
+            "max_tokens": 32000
+        },
+        "messages": history
+    }   
 
-    history["messages"].append({
-        "role": "user",
-        "content": prompt
-        }
-    )
-                               
     data_to_send ={
-        "input": history
+        "input": content
     }
 
     head = {}
     head["authorization"] = API_key
     
-    print ("Calling EraX API ....")
+    erax_url = f"https://api.runpod.ai/v2/{erax_url_id}/runsync"   
+    res = requests.post(erax_url, headers=head, json=data_to_send, timeout=3600)
     
-    res = requests.post(erax_url, headers=head, json=data_to_send)
+    error = False
     
-    result =  res.json()["output"]
-
-    history["messages"].append({
+    try:
+        result =  res.json()["output"]
+    except:
+        result =  res.json()
+        try:
+            result = checkStatusLongRun(result, erax_url_id=erax_url_id)["output"]
+        except:
+            error = True
+                                
+    content["messages"].append({
             "role": "assistant",
             "content": result
     }
     )
     
-    return result, history
+    return result, content
+
+
+# # PDF captioning ALL pages w/ PDF paths OR Base64
+# - Bạn có thể dùng API này để parse PDF cả text & ảnh trong đó
+# - Lưu ý prompt hợp lý theo đúng kiểu văn bản cần parse
+# - API chỉ chấp nhận 1 PDF tại 1 thời điểm
+# - API này kỳ vọng bạn truyền vào đường dẫn đến file PDF hoặc Base64
+
+pdf_full_prompt = """
+Bạn là một chuyên gia bồi thường bảo hiểm xuất sắc.
+Bạn được cung cấp danh sách các json là kết quả đã được OCR theo đúng thứ tự của các ảnh. 
+Các json này là của một hay nhiều phiếu trong bộ hồ sơ yêu cầu bồi thường bảo hiểm hay hoá đơn các loại.
+
+Bạn có 1 nhiệm vụ: phân tích và tổng hợp các jsons được cung cấp này:
+- Tổng hợp tất cả các json trên bằng 1 json có tính tổng hợp để công ty tiến hành xem xét thủ tục bồi thường chính xác và công bằng với định dạng json dưới đây.
+- Không được bỏ qua bất kỳ chi tiết nào về các triệu chứng, các loại thuốc được kê mua, tên bệnh, đề xuất, các phí dịch vụ y tế và các chi phí khác.
+- Nếu cùng một giấy tờ (cùng tên, cùng nhà cung cấp, cùng khách hàng, cùng ngày cấp và người được cấp...) nhưng đang nằm ở nhiều json, bạn phải tổng hợp thành "loại giấy tờ" duy nhất
+- Không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
+
+Trả về định dạng json đa văn bản như sau. Không diễn giải cách làm, không tóm tắt, chỉ trả lại duy nhất 1 json như sau:
+
+```json
+[
+    {
+        "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
+        "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
+        "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
+        "doctors": { các thông tin của bức ảnh này về các bác sỹ, y sỹ nếu có... Nếu không có thì để None. },
+        "products": { các thông tin của bức ảnh này về dịch vụ, xét nghiệm, chụp chiếu, giá tiền... Nếu không có thì để None },
+        "services": { các thông tin của bức ảnh này về sản phẩm như thuốc, giá tiền... Nếu không có thì để None },
+        "total amount": <tổng cố tiền trong của bức ảnh này. Nếu không có thì để None>,
+        "conclusion": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
+        "others": { các thông tin khác trong bức ảnh này như ghi chú, điều kiện, uỷ quyền, cam kết... Nếu không có thì để None },
+        ... tất cả thông tin khác nếu có...
+    }
+]
+```
+
+# Output:
+"""
+
+def API_PDF_Full_OCR_EraX_VL_7B_vLLM(pdf_paths=None,
+                                       is_base64=False,
+                                       prompt=ycbt_prompt, 
+                                       pdf_full_prompt=pdf_full_prompt, 
+                                       erax_url_id=erax_url_a100_id, 
+                                       API_key=API_key_3P):
+
+    def getPDF_text(json_content):
+        text = ""
+        for data in json_content:
+            text += data["text"]
+            for img_text in data["images_text"]:
+                text += "\n\n" + img_text["text"] 
+        return text
+    
+    print ("Parsing PDF...")
+    ocr_result, _ = API_PDF_OCR_EraX_VL_7B_vLLM(pdf_paths=pdf_paths, 
+                                                is_base64=is_base64,
+                                                prompt=prompt,
+                                                erax_url_id=erax_url_id, API_key=API_key)
+        
+    try:
+        final_pdf = json_repair.loads(ocr_result)
+        final_pdf =  str(getPDF_text(final_pdf["json_content"]).replace("```json", "").replace("```", "").replace("\n\n", "\n").replace("\n\n", "\n"))
+    except Exception as E:
+        print("ERROR wrong PDF output format!", str(E))
+        return final_pdf
+        
+    print ("Summarize result...")
+    new_prompt =  str(f"{final_pdf}\n\n{pdf_full_prompt}")
+
+    print (new_prompt)
+    
+    # Chat w/ API to summarize all into 1
+    try:
+        final_result, history = API_Chat_OCR_EraX_VL_7B_vLLM(new_prompt, 
+                                                             history=None, 
+                                                             erax_url_id=erax_url_id, API_key=API_key_3P)
+    except Exception as E:
+        print ("ERROR chatting w/ API: ", str(E))
+        return new_prompt, None
+        
+    # Done
+    final_pdf_text =  final_result.replace("```json", "").replace("```", "").replace("\n\n", "\n").replace("\n\n", "\n")  
+    try:
+        final_pdf_text = json_repair.loads(final_pdf_text)
+    except:
+        pass
+        
+    return final_pdf_text, history         
+
+
+# # Captioning multiple images w/ paths OR Base64
+# - Bạn có thể dùng API này để parse multiple images cả text & ảnh trong đó
+# - Lưu ý prompt hợp lý theo đúng kiểu văn bản cần parse
+# 
+def API_Multiple_Images_OCR_EraX_VL_7B_vLLM(image_paths=None,
+                                       is_base64=False,
+                                       prompt=ycbt_prompt, 
+                                       pdf_full_prompt=pdf_full_prompt, 
+                                       erax_url_id=erax_url_a100_id, 
+                                       API_key=API_key_3P):
+
+    print ("--> Parsing all images...")
+
+    output_text = ""
+    for idx, img_path in enumerate(image_paths):
+        print (f"- Parsing image...{idx}")
+        add_img_content(img_path, )
+        
+        ocr_result, _ = API_Image_OCR_EraX_VL_7B_vLLM(image_paths=[img_path],
+                                                      is_base64=is_base64,
+                                                      prompt=prompt,
+                                                      erax_url_id=erax_url_id, 
+                                                      API_key=API_key)
+            
+        output_text += f"** Nội dung của giấy tờ trong ảnh số {idx+1}**\n" + \
+                           ocr_result.replace("```json", "").replace("```", "") +"\n\n"
+                
+    print ("--> Summarize result...")
+    
+    new_prompt =  f"{output_text}\n\n{pdf_full_prompt}"
+
+    print (new_prompt)
+    
+    # Chat w/ API to summarize all into 1
+    try:
+        final_result, history = API_Chat_OCR_EraX_VL_7B_vLLM(new_prompt, 
+                                                             history=None, 
+                                                             erax_url_id=erax_url_id, API_key=API_key_3P)
+    except Exception as E:
+        print ("ERROR chatting w/ API: ", str(E))
+        return new_prompt, None
+        
+    # Done
+    final_text =  final_result.replace("```json", "").replace("```", "")
+    try:
+        final_text = json_repair.loads(final_text)
+    except:
+        pass
+        
+    return final_text, history         
