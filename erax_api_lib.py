@@ -49,46 +49,48 @@ Nhiệm vụ: OCR ảnh này chính xác từng từ và không thiếu chi ti�
 - chú ý các cụm từ viết tắt: bảo hiểm y tế (BHYT)
 - không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
 - Dữ liệu được ocr ở trên có thể thiếu hoặc sai thông tin từ trong ảnh, hãy phân tích kỹ lại ảnh và tạo các hội thoại để khai thác thêm thông tin từ ảnh mà có thể không có trong json ocr được cung cấp.
-- nếu có bảng biểu, phải bảo đảm tất cả các cột của bảng đều nằm đầy đủ trong json
+- Nếu có bảng biểu, phải bảo đảm tất cả các cột của bảng đều nằm đầy đủ trong json
+- Lưu ý phải tóm tắt ngắn gọn sau khi phân tích
 
 Trả về kết quả theo định dạng json bằng tiếng Việt:
 
 ```json
 {
-     "extraction": <str diễn giải nội dung của bức ảnh này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
-     "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
-     "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
-     "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
-     "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
-     "doctors": { các thông tin của bức ảnh này về bác sỹ, y sỹ tham gia điều trị, xét nghiệm, đánh giá bệnh hay kê đơn,... Nếu không có thì để None. },
-     "medicines": [ liệt kê chính xác thông tin của bức ảnh này về tất cả các loại thuốc được kê đơn và thông tin y tế của chúng... Nếu không có thì để None 
-    		 {
-    			"medicine": <tên thuốc. Diễn giải đầy đủ, chính xác tên thuốc và các đặc điểm của thuốc như trong ảnh>,
-    			"unit of dosage": <liều lượng sử dụng của thuốc này. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
-    			"frequency and dosage": ["sáng": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>, "chiều": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>,],
-    			"unit of purchase": <đơn vị tính của lượng thuốc này khi mua, thường nằm ở cột có tên là 'Đơn vị'. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
-    			"quantity purchased": <số lượng đơn vị được kê đơn hay mua, thường nằm ở cột có tên là 'Số lượng'. Ví dụ: 1, 2, 10, 20, 42... Nếu không có thì để None>,
-    			"nota bene": <các lưu ý quan trọng về việc bảo quản hay trước hoặc sau khi sử dụng thuốc này.>
-    		}
-    	],
-     "products and services": { các thông tin của bức ảnh về các sản phẩm hay dịch vụ được cung cấp như khám, tái khám, nội trú, xét nghiệm, chụp chiếu, giải phẫu, công cụ, cung cấp thuốc y tế, đơn giá, thành tiền, được BHYT trả bao nhiêu... Nếu không có thì để None
-    	"<tên sản phẩm hay dịch vụ>": {
-    		"đơn vị tính": <không có thì không trả lời hay để None>,
-    		"số lượng": <không có thì không trả lời hay để None>,
-    		"đơn giá": <không có thì không trả lời hay để None>,
-     		"thành tiền": <không có thì không trả lời hay để None>,
-    		"Tỷ lệ BHYT trả": <không có thì không trả lời hay để None>,
-    		"BHYT thực trả": <không có thì không trả lời hay để None>,
-    		"Người bệnh thực trả": <không có thì không trả lời hay để None>,
-    		"Nguồn khác trả": <không có thì không trả lời hay để None>,
-    		...các thông tin khác về sản phẩm hay dịch vụ
-     	}
-     "reason": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
-     "results": [<liệt kê chi tiết các kết quả xét nghiệm, là các chỉ số y khoa trong khoảng tham chiếu và ngưỡng cần phải lưu ý. Có thể bao gồm: chỉ định, kết quả, đơn vị, khoảng tham chiếu, quy trình, thiết bị, các lưu ý...> , ... Nếu không có thì để None ],
-     "total amount": <tổng cố tiền phải trả nếu có trong của bức ảnh này. Nếu không có thì để None>,
-     "conclusion": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
-     "others": { các thông tin khác trong bức ảnh này như các lưu ý, ghi chú, điều kiện, uỷ quyền, cam kết của cả người mua và người bán... Nếu không có thì để None },
-     ... tất cả thông tin khác nếu có...
+    "extraction": <str diễn giải nội dung của giấy tờ này này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
+    "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
+    "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
+    "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
+    "reasons": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
+    "results": [<liệt kê chi tiết các kết quả xét nghiệm, bao gồm tên xủa xét nghiệm hay thủ thuật y tế và kết quả liên quan, là các chỉ số y khoa trong khoảng tham chiếu và ngưỡng cần phải lưu ý. Có thể bao gồm: chỉ định, kết quả, đơn vị, khoảng tham chiếu, quy trình, thiết bị, các lưu ý...> , ... Nếu không có thì để None ],
+    "conclusions": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
+    "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
+    "doctors": { các thông tin của bức ảnh này về bác sỹ, y sỹ tham gia điều trị, xét nghiệm, đánh giá bệnh hay kê đơn,... Nếu không có thì để None. },
+    "medicines": [ liệt kê chính xác thông tin của bức ảnh này về tất cả các loại thuốc được kê đơn và thông tin y tế của chúng... Nếu không có thì để None 
+             {
+                "medicine": <tên thuốc. Diễn giải đầy đủ, chính xác tên thuốc và các đặc điểm của thuốc như trong ảnh>,
+                "unit of dosage": <liều lượng sử dụng của thuốc này. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
+                "frequency and dosage": ["sáng": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>, "chiều": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>,],
+                "unit of purchase": <đơn vị tính của lượng thuốc này khi mua, thường nằm ở cột có tên là 'Đơn vị'. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
+                "quantity purchased": <số lượng đơn vị được kê đơn hay mua, thường nằm ở cột có tên là 'Số lượng'. Ví dụ: 1, 2, 10, 20, 42... Nếu không có thì để None>,
+                "nota bene": <các lưu ý quan trọng về việc bảo quản hay trước hoặc sau khi sử dụng thuốc này.>
+            }
+        ],
+    "products and services": { các thông tin của bức ảnh về các sản phẩm hay dịch vụ được cung cấp như khám, tái khám, nội trú, xét nghiệm, chụp chiếu, giải phẫu, công cụ, cung cấp thuốc y tế, đơn giá, thành tiền, được BHYT trả bao nhiêu... Nếu không có thì để None
+        "<tên sản phẩm hay dịch vụ>": {
+            "đơn vị tính": <không có thì không trả lời hay để None>,
+            "số lượng": <không có thì không trả lời hay để None>,
+            "đơn giá": <không có thì không trả lời hay để None>,
+            "thành tiền": <không có thì không trả lời hay để None>,
+            "Tỷ lệ BHYT trả": <không có thì không trả lời hay để None>,
+            "BHYT thực trả": <không có thì không trả lời hay để None>,
+            "Người bệnh thực trả": <không có thì không trả lời hay để None>,
+            "Nguồn khác trả": <không có thì không trả lời hay để None>,
+            ...các thông tin khác về sản phẩm hay dịch vụ
+        }
+    "total amount": <tổng cố tiền phải trả nếu có trong của bức ảnh này. Nếu không có thì để None>,
+    "others": { các thông tin khác trong bức ảnh này như các lưu ý, ghi chú, điều kiện, uỷ quyền, cam kết của cả người mua và người bán... Nếu không có thì để None },
+    "summary": <str tóm tắt hồ sơ này và các điểm nhấn quan trọng>,
+    ... tất cả thông tin khác nếu có...
 }
 ```
 
@@ -97,66 +99,67 @@ Trả về kết quả theo định dạng json bằng tiếng Việt:
 
 pdf_full_prompt = """
 Bạn là một chuyên gia bồi thường bảo hiểm xuất sắc.
-Bạn được cung cấp danh sách các json là kết quả đã được OCR theo đúng thứ tự của bộ ảnh.
+Bạn được cung cấp danh sách các json là kết quả đã được OCR chính xác.
 Các json này là của một hay nhiều phiếu trong bộ hồ sơ yêu cầu bồi thường bảo hiểm hay hoá đơn các loại.
 
 Bạn có 1 nhiệm vụ: phân tích và tổng hợp các jsons được cung cấp này:
-- Tổng hợp tất cả các json trên bằng 1 json có tính tổng hợp để công ty tiến hành xem xét thủ tục bồi thường chính xác và công bằng với định dạng json dưới đây.
+- Phân tích kỹ lưỡng các json được cung cấp.
+- Tổng hợp tất cả các json trên bằng 1 json duy nhất có tính tổng hợp để công ty tiến hành xem xét thủ tục bồi thường chính xác và công bằng với định dạng json dưới đây.
 - Không được bỏ qua bất kỳ chi tiết nào về các triệu chứng, các loại thuốc được kê mua, tên bệnh, đề xuất, các phí dịch vụ y tế và các chi phí khác.
 - Nếu cùng một giấy tờ (cùng tên, cùng nhà cung cấp, cùng khách hàng, cùng ngày cấp và người được cấp...) nhưng đang nằm ở nhiều json, bạn phải tổng hợp thành "loại giấy tờ" duy nhất
-- Tên loại giấy tờ phải là duy nhất bằng cách thêm thông tin để phân biệt chúng với nhau.
 - Không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
+- Lưu ý phải tóm tắt ngắn gọn sau khi phân tích
 
 Trả về định dạng json đa văn bản như sau. Không diễn giải cách làm, không tóm tắt, chỉ trả lại duy nhất 1 json như sau:
 
 ```json
 {
-    "paper": <str tên loại giấy tờ>:
-        {
-            "extraction": <str diễn giải nội dung của giấy tờ này này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
-            "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
-            "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
-            "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
-            "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
-            "doctors": { các thông tin của bức ảnh này về bác sỹ, y sỹ tham gia điều trị, xét nghiệm, đánh giá bệnh hay kê đơn,... Nếu không có thì để None. },
-            "medicines": [ liệt kê chính xác thông tin của bức ảnh này về tất cả các loại thuốc được kê đơn và thông tin y tế của chúng... Nếu không có thì để None 
-                     {
-                        "medicine": <tên thuốc. Diễn giải đầy đủ, chính xác tên thuốc và các đặc điểm của thuốc như trong ảnh>,
-                        "unit of dosage": <liều lượng sử dụng của thuốc này. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
-                        "frequency and dosage": ["sáng": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>, "chiều": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>,],
-                        "unit of purchase": <đơn vị tính của lượng thuốc này khi mua, thường nằm ở cột có tên là 'Đơn vị'. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
-                        "quantity purchased": <số lượng đơn vị được kê đơn hay mua, thường nằm ở cột có tên là 'Số lượng'. Ví dụ: 1, 2, 10, 20, 42... Nếu không có thì để None>,
-                        "nota bene": <các lưu ý quan trọng về việc bảo quản hay trước hoặc sau khi sử dụng thuốc này.>
-                    }
-                ],
-            "products and services": { các thông tin của bức ảnh về các sản phẩm hay dịch vụ được cung cấp như khám, tái khám, nội trú, xét nghiệm, chụp chiếu, giải phẫu, công cụ, cung cấp thuốc y tế, đơn giá, thành tiền, được BHYT trả bao nhiêu... Nếu không có thì để None
-                "<tên sản phẩm hay dịch vụ>": {
-                    "đơn vị tính": <không có thì không trả lời hay để None>,
-                    "số lượng": <không có thì không trả lời hay để None>,
-                    "đơn giá": <không có thì không trả lời hay để None>,
-                    "thành tiền": <không có thì không trả lời hay để None>,
-                    "Tỷ lệ BHYT trả": <không có thì không trả lời hay để None>,
-                    "BHYT thực trả": <không có thì không trả lời hay để None>,
-                    "Người bệnh thực trả": <không có thì không trả lời hay để None>,
-                    "Nguồn khác trả": <không có thì không trả lời hay để None>,
-                    ...các thông tin khác về sản phẩm hay dịch vụ
+    "<str tên loại giấy tờ được cung cấp trong các json trên>":
+    {
+        "extraction": <str diễn giải nội dung của giấy tờ này này một cách đầy đủ nhất có thể và không được thiếu thông tin gì.>,
+        "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
+        "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
+        "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
+        "reasons": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
+        "results": [<liệt kê chi tiết các kết quả xét nghiệm, bao gồm tên xủa xét nghiệm hay thủ thuật y tế và kết quả liên quan, là các chỉ số y khoa trong khoảng tham chiếu và ngưỡng cần phải lưu ý. Có thể bao gồm: chỉ định, kết quả, đơn vị, khoảng tham chiếu, quy trình, thiết bị, các lưu ý...> , ... Nếu không có thì để None ],
+        "conclusions": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
+        "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
+        "doctors": { các thông tin của bức ảnh này về bác sỹ, y sỹ tham gia điều trị, xét nghiệm, đánh giá bệnh hay kê đơn,... Nếu không có thì để None. },
+        "medicines": [ liệt kê chính xác thông tin của bức ảnh này về tất cả các loại thuốc được kê đơn và thông tin y tế của chúng... Nếu không có thì để None 
+                 {
+                    "medicine": <tên thuốc. Diễn giải đầy đủ, chính xác tên thuốc và các đặc điểm của thuốc như trong ảnh>,
+                    "unit of dosage": <liều lượng sử dụng của thuốc này. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
+                    "frequency and dosage": ["sáng": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>, "chiều": <liều lượng. Ví dụ: 1 viên, 2 ống, 5 bút, 20 UI...>,],
+                    "unit of purchase": <đơn vị tính của lượng thuốc này khi mua, thường nằm ở cột có tên là 'Đơn vị'. Ví dụ: viên, ống, bút, UI, cái, hộp... Nếu không có thì để None>,
+                    "quantity purchased": <số lượng đơn vị được kê đơn hay mua, thường nằm ở cột có tên là 'Số lượng'. Ví dụ: 1, 2, 10, 20, 42... Nếu không có thì để None>,
+                    "nota bene": <các lưu ý quan trọng về việc bảo quản hay trước hoặc sau khi sử dụng thuốc này.>
                 }
-            "reason": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
-            "results": [<liệt kê chi tiết các kết quả xét nghiệm, là các chỉ số y khoa trong khoảng tham chiếu và ngưỡng cần phải lưu ý. Có thể bao gồm: chỉ định, kết quả, đơn vị, khoảng tham chiếu, quy trình, thiết bị, các lưu ý...> , ... Nếu không có thì để None ],
-            "total amount": <tổng cố tiền phải trả nếu có trong của bức ảnh này. Nếu không có thì để None>,
-            "conclusion": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
-            "others": { các thông tin khác trong bức ảnh này như các lưu ý, ghi chú, điều kiện, uỷ quyền, cam kết của cả người mua và người bán... Nếu không có thì để None },
-            ... tất cả thông tin khác nếu có...
-        },
-        
-    ... tất cả giấy tờ khác nếu có...
+            ],
+        "products and services": { các thông tin của bức ảnh về các sản phẩm hay dịch vụ được cung cấp như khám, tái khám, nội trú, xét nghiệm, chụp chiếu, giải phẫu, công cụ, cung cấp thuốc y tế, đơn giá, thành tiền, được BHYT trả bao nhiêu... Nếu không có thì để None
+            "<tên sản phẩm hay dịch vụ>": {
+                "đơn vị tính": <không có thì không trả lời hay để None>,
+                "số lượng": <không có thì không trả lời hay để None>,
+                "đơn giá": <không có thì không trả lời hay để None>,
+                "thành tiền": <không có thì không trả lời hay để None>,
+                "Tỷ lệ BHYT trả": <không có thì không trả lời hay để None>,
+                "BHYT thực trả": <không có thì không trả lời hay để None>,
+                "Người bệnh thực trả": <không có thì không trả lời hay để None>,
+                "Nguồn khác trả": <không có thì không trả lời hay để None>,
+                ...các thông tin khác về sản phẩm hay dịch vụ
+            }
+        "total amount": <tổng cố tiền phải trả nếu có trong của bức ảnh này. Nếu không có thì để None>,
+        "summary": <str tóm tắt tòn bộ hồ sơ này và các điểm nhấn quan trọng>,
+        "others": { các thông tin khác trong bức ảnh này như các lưu ý, ghi chú, điều kiện, uỷ quyền, cam kết của cả người mua và người bán... Nếu không có thì để None },
+        ... tất cả thông tin khác nếu có...
+    },
+    ... tất cả giấy tờ khác nếu có...,
 }
 ```
 
 # Output:
 """
 
-ycbt_combination_prompt =  """
+ycbt_combination_single_image_prompt =  """
 Bạn là một hệ thống AI đẳng cấp thế giới hỗ trợ nhận diện ký tự quang học (Optical Character Recognition - OCR) từ hình ảnh.
 Bạn được cung cấp 1 (một) hình ảnh hợp pháp, không vi phạm. 
 Bạn phải thực hiện 02 (hai) nhiệm vụ chính, bao gồm:
@@ -176,7 +179,8 @@ Bạn phải thực hiện 02 (hai) nhiệm vụ chính, bao gồm:
 - chú ý các cụm từ viết tắt: bảo hiểm y tế (BHYT)
 - không được bỏ qua bất kỳ nội dung nào, kể cả các ghi chú, điều kiện, uỷ quyền, cam kết
 - Dữ liệu được ocr ở trên có thể thiếu hoặc sai thông tin từ trong ảnh, hãy phân tích kỹ lại ảnh và tạo các hội thoại để khai thác thêm thông tin từ ảnh mà có thể không có trong json ocr được cung cấp.
-- nếu có bảng biểu, phải bảo đảm tất cả các cột của bảng đều nằm đầy đủ trong json
+- Nếu có bảng biểu, phải bảo đảm tất cả các cột của bảng đều nằm đầy đủ trong json
+- Lưu ý phải tóm tắt ngắn gọn sau khi phân tích
 
 2. Nhiệm vụ 2:
 ## Tạo hội thoại dựa vào thông tin được OCR:
@@ -210,6 +214,9 @@ Trả về kết quả theo định dạng json bằng tiếng Việt:
      "paper": <str tên loại giấy tờ của bức ảnh này. Nếu không có thì để None. >,
      "customer": { các thông tin của bức ảnh này về khách hàng nếu có. Nếu không có thì để None },
      "status": [<liệt kê các bệnh sử y khoa của bệnh nhân đã khai báo nếu có>, ...],
+     "reasons": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
+     "results": [<liệt kê chi tiết các kết quả xét nghiệm, bao gồm tên xủa xét nghiệm hay thủ thuật y tế và kết quả liên quan, là các chỉ số y khoa trong khoảng tham chiếu và ngưỡng cần phải lưu ý. Có thể bao gồm: chỉ định, kết quả, đơn vị, khoảng tham chiếu, quy trình, thiết bị, các lưu ý...> , ... Nếu không có thì để None ],
+     "conclusions": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
      "supplier": { các thông tin của bức ảnh này về nhà cung cấp, bệnh viện, phòng khác nếu có... Nếu không có thì để None. },
      "doctors": { các thông tin của bức ảnh này về bác sỹ, y sỹ tham gia điều trị, xét nghiệm, đánh giá bệnh hay kê đơn,... Nếu không có thì để None. },
      "medicines": [ liệt kê chính xác thông tin của bức ảnh này về tất cả các loại thuốc được kê đơn và thông tin y tế của chúng... Nếu không có thì để None 
@@ -234,12 +241,10 @@ Trả về kết quả theo định dạng json bằng tiếng Việt:
     		"Nguồn khác trả": <không có thì không trả lời hay để None>,
     		...các thông tin khác về sản phẩm hay dịch vụ
      },
-     "reason": <diễn giải càng chi tiết càng tốt lý do bệnh nhân phải sử dụng dịch vụ khám, chữa bệnh, xét nghiệm, phẫu thuật hay mua các sản phẩm trong ảnh. Nếu không có thì để None>,
-     "results": [<liệt kê chi tiết các kết quả xét nghiệm, là các chỉ số y khoa trong khoảng tham chiếu và ngưỡng cần phải lưu ý. Có thể bao gồm: chỉ định, kết quả, đơn vị, khoảng tham chiếu, quy trình, thiết bị, các lưu ý...> , ... Nếu không có thì để None ],
      "total amount": <tổng cố tiền phải trả nếu có trong của bức ảnh này. Nếu không có thì để None>,
-     "conclusion": { các kết luận của các y sỹ, bác sỹ trong bức ảnh này nếu có. Nếu không có thì để None },
      "others": { các thông tin khác trong bức ảnh này như các lưu ý, ghi chú, điều kiện, uỷ quyền, cam kết của cả người mua và người bán... Nếu không có thì để None },
-     ... tất cả thông tin khác nếu có...
+     "summary": <str tóm tắt hồ sơ này và các điểm nhấn quan trọng>,
+     ... tất cả thông tin khác nếu có...,
     "conversations": [
          {
           "role": "human"
@@ -525,7 +530,7 @@ def checkStatusLongRun(ocr_result, erax_url_id=erax_url, API_key=API_key_3P):
     while True:
         time.sleep(0.5)
         if type(final_result)==dict:
-            if "status" in final_result.keys() and (final_result["status"]==["IN_PROGRESS"] or final_result["status"]=="IN_QUEUE"):
+            if "status" in final_result.keys() and (final_result["status"]=="IN_PROGRESS" or final_result["status"]=="IN_QUEUE"):
                 job_id    =  final_result["id"]
                 worker_id =  final_result["workerId"]
                 print(f"Check status & result...{job_id}")
