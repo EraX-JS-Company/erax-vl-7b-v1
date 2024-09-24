@@ -15,6 +15,7 @@ After a month's relentless efforts, today we are thrilled to release **EraX-VL-7
 `EraX-VL-7B-V1` is the latest version of the vision language models in the EraX model families. 
 
 ## Benchmark
+Below is the evaluation benchmark of **global open-source and proprietary Multimodal Models** on the [MTVQA](https://huggingface.co/datasets/ByteDance/MTVQA) Vietnamese test set conducted by [VinBigdata](https://www.linkedin.com/feed/update/urn:li:activity:7243887708966641664/). We plan to conduct more detailed and diverse evaluations in the near future.
 <div align="left">
   <img src="https://cdn-uploads.huggingface.co/production/uploads/66e93d483745423cbb14c5ff/-OYkSDVyAcAcLLgO2N5XT.jpeg" width="500"/>
   
