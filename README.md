@@ -11,6 +11,7 @@
 ## Introduction
 
 After a month's relentless efforts, today we are thrilled to release **EraX-VL-7B-V1**! 
+
 ***NOTA BENE***: EraX-VL-7B-V1 is NOT a typical OCR-only tool likes Tesseract but is a **Multimodal LLM-based model**. To use it effectively, you may have to **twist your prompt carefully** depending on your tasks.
 
 `EraX-VL-7B-V1` is the latest version of the vision language models in the EraX model families. 
