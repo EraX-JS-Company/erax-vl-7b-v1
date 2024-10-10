@@ -291,7 +291,14 @@ def API_Multiple_Images_OCR_EraX_VL_7B_vLLM(
     print ("--> Summarize result...")
     
     pdf_full_prompt_to_send =  pdf_full_prompt.replace("ocr_results", output_text)
+    
+    if pdf_full_prompt_to_send == pdf_full_prompt:
+        pdf_full_prompt_to_send = f"{pdf_full_prompt}\n\n{output_text}"
+        
     new_prompt = f"{pdf_full_prompt_to_send}"
+    
+    # print(new_prompt)
+    
 
     # Chat w/ API to summarize all into 1
     try:
@@ -305,6 +312,8 @@ def API_Multiple_Images_OCR_EraX_VL_7B_vLLM(
     except Exception as E:
         print ("ERROR chatting w/ API: ", str(E))
         return new_prompt, None
+    
+    # print(final_result)
         
     # # Done
     # final_text =  final_result.replace("```json", "").replace("```", "")

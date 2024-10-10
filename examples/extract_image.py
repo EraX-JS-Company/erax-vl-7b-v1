@@ -9,7 +9,6 @@ FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from erax_vl_7b_v1.prompts import (
     sickness_medicines, 
@@ -55,7 +54,6 @@ if __name__ == "__main__":
             prompt=prompt, 
             erax_url_id=ERAX_URL_ID, 
             API_key=API_KEY,
-            force_scale=True
         )
     
     # Convert string json to json. It is result.
