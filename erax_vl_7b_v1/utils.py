@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import pymupdf
 
 from json_repair import repair_json
-from prompts import (
+from erax_vl_7b_v1.prompts import (
         sickness_medicines, 
         cities, 
         default_prompt, 

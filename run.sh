@@ -1,0 +1,1 @@
+python3 ./examples/ocr_image.py

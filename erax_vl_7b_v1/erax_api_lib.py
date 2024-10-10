@@ -15,7 +15,7 @@ import pymupdf
 import requests
 import time
 from json_repair import repair_json
-from prompts import (
+from erax_vl_7b_v1.prompts import (
     sickness_medicines, 
     cities, 
     default_prompt, 
@@ -25,7 +25,7 @@ from prompts import (
     pdf_full_prompt, 
     ycbt_ocr_conversation_single_image_prompt
 )
-from utils import (
+from erax_vl_7b_v1.utils import (
     process_lr,
     get_json,
     openBase64_Image,

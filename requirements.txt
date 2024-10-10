@@ -1,7 +1,10 @@
-json_repair 
-numpy 
-matplotlib
-tqdm
-pillow
-pymupdf
+json_repair==0.29.10 
+numpy==1.26.4 
+matplotlib==3.8.4
+tqdm==4.66.5
+pillow==10.3.0
+PyMuPDF==1.24.11
 opencv-python
+python-dotenv
+requests
+regex==2024.9.11
