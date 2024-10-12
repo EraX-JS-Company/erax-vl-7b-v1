@@ -76,7 +76,7 @@ processor = AutoProcessor.from_pretrained(
      max_pixels=max_pixels,
  )
 
-image_path ="image.jpg"
+image_path = "image.jpg"
 
 with open(image_path, "rb") as f:
     encoded_image = base64.b64encode(f.read())
@@ -93,8 +93,7 @@ messages = [
             },
             {
                 "type": "text",
-                "text": "Diễn tả nội dung bức ảnh như 1 bác sỹ giỏi."
-                # "Diễn tả nội dung bức ảnh này bằng định dạng json."
+                "text": "Diễn tả nội dung bức ảnh này bằng định dạng json."
             },
         ],
     }
@@ -162,7 +161,7 @@ from erax_vl_7b_v1.erax_api_lib import (
 ERAX_URL_ID = "EraX's URL ID"
 API_KEY = "EraX's API Key"
 
-image_path = "image_path"
+image_path = "image.jpg"
 prompt = """Hãy trích xuất toàn bộ chi tiết của các bức ảnh này theo đúng thứ tự của nội dung bằng định dạng json và không bình luận gì thêm."""
 
 result, history =  API_Image_OCR_EraX_VL_7B_vLLM(
