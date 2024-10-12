@@ -136,6 +136,48 @@ output_text = processor.batch_decode(
 
 print(output_text[0])
 ```
+### Using API
+```python
+import os
+
+from erax_vl_7b_v1.utils import (
+    process_lr,
+    get_json,
+    openBase64_Image,
+    add_img_content,
+    add_pdf_content,
+    add_pdf_content_json
+)
+from erax_vl_7b_v1.erax_api_lib import (
+    API_Image_OCR_EraX_VL_7B_vLLM,
+    API_PDF_OCR_EraX_VL_7B_vLLM,
+    API_Chat_OCR_EraX_VL_7B_vLLM,
+    API_Multiple_Images_OCR_EraX_VL_7B_vLLM,
+    API_PDF_Full_OCR_EraX_VL_7B_vLLM
+)
+
+
+ERAX_URL_ID = ""
+API_KEY = ""
+
+image_path = "./hoadon.jpg"
+
+prompt = """Hãy trích xuất toàn bộ chi tiết của các bức ảnh này theo đúng thứ tự của nội dung bằng định dạng json và không bình luận gì.
+"""
+
+result, history =  API_Image_OCR_EraX_VL_7B_vLLM(
+        image_paths=image_path, 
+        is_base64=False,
+        prompt=prompt, 
+        erax_url_id=ERAX_URL_ID, 
+        API_key=API_KEY,
+    )
+
+# Convert string json to json. It is result.
+json_result = get_json(result) 
+
+print(json_result)
+```
 
 ## For API inquiry
 - For correspondence regarding this work or inquiry for API trial, please contact Nguyễn Anh Nguyên at [nguyen@erax.ai](nguyen@erax.ai).
