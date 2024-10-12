@@ -137,6 +137,9 @@ output_text = processor.batch_decode(
 print(output_text[0])
 ```
 ### Using API
+```bash
+pip install erax-vl-7b-v1==0.1.0
+```
 ```python
 import os
 
@@ -156,14 +159,11 @@ from erax_vl_7b_v1.erax_api_lib import (
     API_PDF_Full_OCR_EraX_VL_7B_vLLM
 )
 
+ERAX_URL_ID = "EraX's URL ID"
+API_KEY = "EraX's API Key"
 
-ERAX_URL_ID = ""
-API_KEY = ""
-
-image_path = "./hoadon.jpg"
-
-prompt = """Hãy trích xuất toàn bộ chi tiết của các bức ảnh này theo đúng thứ tự của nội dung bằng định dạng json và không bình luận gì.
-"""
+image_path = "image_path"
+prompt = """Hãy trích xuất toàn bộ chi tiết của các bức ảnh này theo đúng thứ tự của nội dung bằng định dạng json và không bình luận gì thêm."""
 
 result, history =  API_Image_OCR_EraX_VL_7B_vLLM(
         image_paths=image_path, 
