@@ -136,9 +136,11 @@ output_text = processor.batch_decode(
 print(output_text[0])
 ```
 ### Using API
+Install `erax-vl-7b-v1` package:
 ```bash
 pip install erax-vl-7b-v1==0.1.0
 ```
+Then you can use this library for image extraction task like this:
 ```python
 import os
 
