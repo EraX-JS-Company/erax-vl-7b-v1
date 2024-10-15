@@ -162,3 +162,5 @@ cython_debug/
 # Others
 tmp
 output.json
+test_2.txt
+test.py
