@@ -76,7 +76,7 @@ processor = AutoProcessor.from_pretrained(
      max_pixels=max_pixels,
  )
 
-image_path ="image.jpg"
+image_path = "image.jpg"
 
 with open(image_path, "rb") as f:
     encoded_image = base64.b64encode(f.read())
@@ -93,8 +93,7 @@ messages = [
             },
             {
                 "type": "text",
-                "text": "Diễn tả nội dung bức ảnh như 1 bác sỹ giỏi."
-                # "Diễn tả nội dung bức ảnh này bằng định dạng json."
+                "text": "Diễn tả nội dung bức ảnh này bằng định dạng json."
             },
         ],
     }
@@ -135,6 +134,50 @@ output_text = processor.batch_decode(
 )
 
 print(output_text[0])
+```
+### Using API
+Install `erax-vl-7b-v1` package:
+```bash
+pip install erax-vl-7b-v1==0.1.0
+```
+Then you can use this library for image extraction task like this:
+```python
+import os
+
+from erax_vl_7b_v1.utils import (
+    process_lr,
+    get_json,
+    openBase64_Image,
+    add_img_content,
+    add_pdf_content,
+    add_pdf_content_json
+)
+from erax_vl_7b_v1.erax_api_lib import (
+    API_Image_OCR_EraX_VL_7B_vLLM,
+    API_PDF_OCR_EraX_VL_7B_vLLM,
+    API_Chat_OCR_EraX_VL_7B_vLLM,
+    API_Multiple_Images_OCR_EraX_VL_7B_vLLM,
+    API_PDF_Full_OCR_EraX_VL_7B_vLLM
+)
+
+ERAX_URL_ID = "EraX's URL ID"
+API_KEY = "EraX's API Key"
+
+image_path = "image.jpg"
+prompt = """Hãy trích xuất toàn bộ chi tiết của các bức ảnh này theo đúng thứ tự của nội dung bằng định dạng json và không bình luận gì thêm."""
+
+result, history =  API_Image_OCR_EraX_VL_7B_vLLM(
+        image_paths=image_path, 
+        is_base64=False,
+        prompt=prompt, 
+        erax_url_id=ERAX_URL_ID, 
+        API_key=API_KEY,
+    )
+
+# Convert string json to json. It is result.
+json_result = get_json(result) 
+
+print(json_result)
 ```
 
 ## For API inquiry
